@@ -25,6 +25,16 @@ public class PlaneDead : MonoBehaviour {
         } else if (isMine && IsGameOver){
 			GameObject.Find("GameScript").GetComponent<GameScript>().GetComponent<GameScript>().SetGameOptions("Empty", "TEST");
 			GameObject.Find("GameScript").GetComponent<GameScript>().GetComponent<GameScript>().SetGameOptions("Erase", "TEST");
+		} else if (!isMine){
+			int[] maxDeads = new int[]{1, 4, 11, 101};
+			if(GameObject.FindGameObjectsWithTag("DeadPlane").Length >= maxDeads[QualitySettings.GetQualityLevel()]) 
+				Destroy(GameObject.FindGameObjectsWithTag("DeadPlane")[0]);
+		}
+
+		foreach(Transform cleanP in PlaneModel.transform){
+			if(cleanP.name == "Propeller" || cleanP.name == "Basic Propeller" || cleanP.name == "Double Propeller" || cleanP.name == "Jet Engine" || cleanP.name == "Double Jet Engine" || cleanP.name == "Magic Reindeer Dust"){
+				Destroy(cleanP.gameObject);
+			}
 		}
 		
 	}
@@ -32,7 +42,7 @@ public class PlaneDead : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
 
-        if (isMine && IsGameOver == false) {
+        if ((isMine && IsGameOver == false) || (!isMine && Time.timeSinceLevelLoad % 1f < 0.3f && this.transform.position.y > 100f)) {
             if (FreeTheParachuter > 1) {
                 FreeTheParachuter -= 1;
             } else if(FreeTheParachuter == 1) {

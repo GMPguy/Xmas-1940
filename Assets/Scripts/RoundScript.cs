@@ -34,10 +34,10 @@ public class RoundScript : MonoBehaviour {
 
 		// Set Level
 		Level = GameScript.GetComponent<GameScript> ().Level;
-        GameObject.FindObjectOfType<LandScript>().spawnLand("Plains", 20, Random.Range(1f, 999999f), 0);
-        MapSize = (int)Mathf.Lerp(5000f, 20000f, (float)Level/20f);
+        GameObject.FindObjectOfType<LandScript>().spawnLand("Plains", 20, Random.Range(1f, 999999f), 3);
+        MapSize = (int)Mathf.Lerp(5000f, 15000f, (float)Level/20f);
         SetUp("Delivery", Level);
-        Player.transform.position = new Vector3(MapSize/3f, 100f, MapSize/3f);
+        Player.transform.position = new Vector3(0f, 500f, MapSize/-3f);
         // Set Level
 		
 	}
@@ -51,10 +51,19 @@ public class RoundScript : MonoBehaviour {
                 for (int Begin = 0; Begin <= 6; Begin ++) {
                     if (Begin == 0) {
                         // Spawn homes
-                        for (int Spawn = 1 + (LevelState / 4); Spawn > 0; Spawn--){
+                        Vector3 PrevHome = new Vector3(0f, 100f, 0f);
+                        int MaxHouses = 1 + (LevelState / 4);
+                        for (int Spawn = MaxHouses; Spawn > 0; Spawn--){
                             GameObject HomeA = Instantiate(Home) as GameObject;
                             HomeA.GetComponent<HomeScript>().HomeIndex = Spawn;
-                            HomeA.transform.position = new Vector3(Random.Range(MapSize/-2f, MapSize/2f), 100f, Random.Range(MapSize/-2f, MapSize/2f));
+                            float Angle = Random.Range(0f, 360f);
+                            HomeA.transform.position = PrevHome;
+                            HomeA.transform.position = new Vector3(
+                                Mathf.Clamp( HomeA.transform.position.x, MapSize/-2.5f, MapSize/2.5f ),
+                                HomeA.transform.position.y,
+                                Mathf.Clamp( HomeA.transform.position.z, MapSize/-2.5f, MapSize/2.5f )
+                            );
+                            PrevHome = HomeA.transform.position + new Vector3(Mathf.Sin(Angle) * MapSize/MaxHouses, 0f, Mathf.Cos(Angle) * MapSize/MaxHouses);
                             placedHomes.Add(HomeA.transform);
                         }
                         // Spawn homes
@@ -68,6 +77,7 @@ public class RoundScript : MonoBehaviour {
                         foreach(string SpawnThePlanes in PlanesToSpawn){
                             GameObject EnemyPlane = Instantiate(Enemy) as GameObject;
                             EnemyPlane.GetComponent<EnemyVesselScript>().TypeofVessel = SpawnThePlanes;
+                            EnemyPlane.GetComponent<EnemyVesselScript>().Power = (float)LevelState/30f;
                             EnemyPlane.transform.position = placedHomes[(int)Random.Range(0f, placedHomes.ToArray().Length-0.1f)].position + new Vector3(Random.Range(-100f, 100f), Random.Range(100f, 1000f), Random.Range(-100f, 100f));
                         }
                          // Spawn planes
@@ -76,6 +86,8 @@ public class RoundScript : MonoBehaviour {
                         for (int Spawn = LevelState / 5; Spawn > 0; Spawn--) {
                             GameObject EnemyPlane = Instantiate(Enemy) as GameObject;
                             EnemyPlane.GetComponent<EnemyVesselScript>().TypeofVessel = "AA Gun";
+                            EnemyPlane.GetComponent<EnemyVesselScript>().Power = (float)LevelState/30f;
+                            EnemyPlane.transform.position = placedHomes[(int)Random.Range(0f, placedHomes.ToArray().Length-0.1f)].position + new Vector3(Random.Range(-500f, 500f), 100f, Random.Range(-500f, 500f));
                         }
                         // Spawn aa guns
                     } else if (Begin == 6){
@@ -83,10 +95,13 @@ public class RoundScript : MonoBehaviour {
                         for (int Spawn = LevelState / 10; Spawn > 0; Spawn--){
                             GameObject EnemyPlane = Instantiate(Enemy) as GameObject;
                             EnemyPlane.GetComponent<EnemyVesselScript>().TypeofVessel = "Balloon";
+                            EnemyPlane.GetComponent<EnemyVesselScript>().Power = (float)LevelState/30f;
+                            EnemyPlane.transform.position = placedHomes[(int)Random.Range(0f, placedHomes.ToArray().Length-0.1f)].position + new Vector3(Random.Range(-500f, 500f), Random.Range(100f, 1000f), Random.Range(-500f, 500f));
                         }
                         // Spawn aa guns
                     }
                 }
+                State = "Deliver Presents";
                 // Spawn Sequence
                 break;
         }

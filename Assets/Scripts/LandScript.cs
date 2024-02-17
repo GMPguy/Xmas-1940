@@ -45,6 +45,7 @@ public class LandScript : MonoBehaviour {
 		SkyColor = SkyColors[ChooseSky];
 
 		Color32 Sky = new(0,0,0,0);
+		float SkySize = 0.5f;
 		Color32 Ambient = new(0,0,0,0);
 		Color32 Fog = new(0,0,0,0);
 		switch(SkyColor){
@@ -56,17 +57,18 @@ public class LandScript : MonoBehaviour {
 				GameObject.Find ("MainLight").transform.eulerAngles = new Vector3 (45f, 0f, 0f);
 				break;
 			case "DarkBlue":
-				Sky = new Color32(0, 0, 75, 255);
-				Ambient = new Color32 (0, 75, 155, 255);
-				Fog = new Color32 (0, 25, 55, 255);
-				GameObject.Find ("MainLight").GetComponent<Light> ().color = new Color32 (0, 55, 75, 255);
+				Sky = new Color32(0, 125, 255, 255);
+				SkySize = 0.2f;
+				Ambient = new Color32 (0, 0, 55, 255);
+				Fog = new Color32 (13, 32, 99, 255);
+				GameObject.Find ("MainLight").GetComponent<Light> ().color = new Color32 (0, 125, 255, 255);
 				GameObject.Find ("MainLight").transform.eulerAngles = new Vector3 (10f, 0f, 0f);
 				break;
 			case "Violet":
-				Sky = new Color32(125, 0, 125, 255);
-				Ambient = new Color32 (25, 25, 55, 255);
-				Fog = new Color32 (25, 25, 55, 255);
-				GameObject.Find ("MainLight").GetComponent<Light> ().color = new Color32 (55, 55, 75, 255);
+				Sky = new Color32(100, 0, 75, 255);
+				Ambient = new Color32 (37, 35, 58, 255);
+				Fog = new Color32 (77, 70, 116, 255);
+				GameObject.Find ("MainLight").GetComponent<Light> ().color = new Color32 (75, 65, 116, 255);
 				GameObject.Find ("MainLight").transform.eulerAngles = new Vector3 (10f, 0f, 0f);
 				break;
 			case "Orange":
@@ -80,8 +82,10 @@ public class LandScript : MonoBehaviour {
 
 		RenderSettings.ambientLight = Ambient;
 
+		RenderSettings.skybox.SetColor("_SkyTint", Sky);
+		RenderSettings.skybox.SetFloat("_AtmosphereThickness", SkySize);
 		RenderSettings.skybox.SetColor("_GroundColor", Fog);
-		RenderSettings.fogColor = Fog;
+		RenderSettings.fogColor = GameObject.Find ("MainCamera").GetComponent<Camera> ().backgroundColor = Fog;
 		// Lighting
 
 	}

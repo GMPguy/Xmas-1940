@@ -7,7 +7,7 @@ public class HomeScript : MonoBehaviour {
 	// References
 	public GameObject MarkerNear;
 	public GameObject MarkerFar;
-	public GameObject Player;
+	public PlayerScript player;
 	// References
 
 	// Main Variables
@@ -47,18 +47,18 @@ public class HomeScript : MonoBehaviour {
 	void Update () {
 
 		if (GameObject.Find ("MainPlane")) {
-			Player = GameObject.Find ("MainPlane");
+			player = GameObject.Find ("MainPlane").GetComponent<PlayerScript>();
 		} else {
-			Player = null;
+			player = null;
 		}
 
-		if (Player != null && GotPresent == false) {
-			if (Vector3.Distance (this.transform.position, Player.transform.position) <= Player.GetComponent<PlayerScript> ().PresentCannonDistane) {
-			    MarkerNear.transform.GetChild (0).GetComponent<TextMesh> ().text = (((Vector3.Distance(this.transform.position, Player.transform.position)) / 1000f).ToString() + "000").Substring(0, 4) + "km";
+		if (player != null && GotPresent == false) {
+			if (Vector3.Distance (this.transform.position, player.transform.position) <= player.GetComponent<PlayerScript> ().PresentCannonDistane) {
+			    MarkerNear.transform.GetChild (0).GetComponent<TextMesh> ().text = ((Vector3.Distance(this.transform.position, player.transform.position) / 1000f).ToString() + "000").Substring(0, 4) + "km";
 				MarkerNear.SetActive (true);
 				MarkerFar.SetActive (false);
 			} else {
-			    MarkerFar.transform.GetChild (0).GetComponent<TextMesh> ().text = (((Vector3.Distance(this.transform.position, Player.transform.position)) / 1000f).ToString() + "000").Substring(0, 4) + "km";
+			    MarkerFar.transform.GetChild (0).GetComponent<TextMesh> ().text = ((Vector3.Distance(this.transform.position, player.transform.position) / 1000f).ToString() + "000").Substring(0, 4) + "km";
                 MarkerNear.SetActive (false);
 				MarkerFar.SetActive (true);
 			}
@@ -135,14 +135,14 @@ public class HomeScript : MonoBehaviour {
 
 		if(GotPresent == false){
 			GotPresent = true;
-			if(Player != null){
+			if(player != null){
 				GameObject.Find ("GameScript").GetComponent<GameScript> ().GainScore (10, 50, "");
-				Player.GetComponent<PlayerScript> ().MainCanvas.GetComponent<CanvasScript> ().FlashImage.color = new Color32 (0, 155, 0, 255);
-				Player.GetComponent<PlayerScript> ().MainCanvas.GetComponent<CanvasScript> ().DisappearSpeed = 0.01f;
-				Player.GetComponent<PlayerScript> ().MainCanvas.GetComponent<CanvasScript> ().SetInfoText ("Present Delivered", "Prezent Dostarczony!", new Color32(0, 225, 0, 255), 2f);
-				Player.GetComponent<PlayerScript> ().Health += Random.Range (Player.GetComponent<PlayerScript> ().MaxHealth / 8f, Player.GetComponent<PlayerScript> ().MaxHealth / 4f);
-				Player.GetComponent<PlayerScript> ().Ammo += Random.Range (Player.GetComponent<PlayerScript> ().MaxAmmo / 8, Player.GetComponent<PlayerScript> ().MaxAmmo / 4);
-				Player.GetComponent<PlayerScript> ().Fuel += (Player.GetComponent<PlayerScript> ().MaxFuel / 4f) * GameObject.Find("GameScript").GetComponent<GameScript>().DifficultyLevel;
+				player.MainCanvas.GetComponent<CanvasScript> ().FlashImage.color = new Color32 (0, 155, 0, 255);
+				player.MainCanvas.GetComponent<CanvasScript> ().DisappearSpeed = 0.01f;
+				player.MainCanvas.GetComponent<CanvasScript> ().SetInfoText ("Present Delivered", "Prezent Dostarczony!", new Color32(0, 225, 0, 255), 2f);
+				player.Health += Random.Range (player.MaxHealth / 4f, player.MaxHealth / 2f);
+				player.Heat = 0f;
+				player.Fuel = player.MaxFuel;
 			}
 		}
 

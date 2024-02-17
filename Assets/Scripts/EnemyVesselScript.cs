@@ -11,17 +11,20 @@ public class EnemyVesselScript : MonoBehaviour {
 	public GameObject[] FarMarkers;
 	public GameObject FarMarker;
 	public GameObject MarkerNear;
+	float MarkerUpdate = 0f;
 	public GameObject PlayerSeen;
 	public GameObject PlayerActuall;
 	public GameObject Bullet;
 	public GameObject PlaneDead;
 	public GameObject BalloonDeadEffects;
 	public GameObject Special;
+	GameObject Camera;
     
 	GameScript GS;
 	// References
 
 	// Main Variables
+	public float Power = 1f;
 	public float Health, Speed, MaxSpeed, RotationSpeed = 100f;
 	public bool IsDead = false;
 	public string TypeofVessel = "Messerschmitt";
@@ -34,6 +37,8 @@ public class EnemyVesselScript : MonoBehaviour {
     // Ai Bevahiour
     float Change = 0f;
     float PullUpMultiplier = 0f;
+	float DetectionDistance = 0f;
+	float GunSpeed = 0f;
 
 	public Transform PointThere;
 	Vector3 FlyingTowards;
@@ -47,6 +52,7 @@ public class EnemyVesselScript : MonoBehaviour {
     void Start () {
 
 		GS = GameObject.Find("GameScript").GetComponent<GameScript>();
+		Camera = GameObject.Find ("MainCamera");
 		PointThere.SetParent(null);
 
 		foreach(Transform ModelChoosen in Models.transform){
@@ -58,34 +64,49 @@ public class EnemyVesselScript : MonoBehaviour {
 		Origin = this.transform.position;
 
 		if (TypeofVessel == "Messerschmitt") {
-			Health = 10f;
-			MaxSpeed = 100f; RotationSpeed = 1f;
+			Health = Mathf.Lerp(10f, 100f, Power);
+			MaxSpeed = Speed = Mathf.Lerp(50f, 200f, Power);
+			RotationSpeed = Mathf.Lerp(0.25f, 2f, Power);
+			GunSpeed = 750f;
+			DetectionDistance = Mathf.Lerp(400f, 1500f, Power);
 		} else if (TypeofVessel == "Messerschmitt Me 262") {
-			Health = 20f;
-			MaxSpeed = 300f; RotationSpeed = 2f;
+			Health = Mathf.Lerp(20f, 200f, Power);
+			MaxSpeed = Speed = Mathf.Lerp(300f, 700f, Power);
+			RotationSpeed = Mathf.Lerp(0.25f, 1f, Power);
+			GunSpeed = 2000f;
+			DetectionDistance = Mathf.Lerp(1000f, 5000f, Power);
 		} else if(TypeofVessel == "Messerschmitt K4"){
-			Health = 20f;
-			MaxSpeed = 200f; RotationSpeed = 2f;
+			Health = Mathf.Lerp(20f, 200f, Power);
+			MaxSpeed = Speed = Mathf.Lerp(50f, 200f, Power);
+			RotationSpeed = Mathf.Lerp(1f, 3f, Power);
+			GunSpeed = 1000f;
+			DetectionDistance = Mathf.Lerp(400f, 1500f, Power);
 		} else if(TypeofVessel == "Messerschmitt 110"){
-			Health = 30f;
-			MaxSpeed = 200f; RotationSpeed = 1f;
+			Health = Mathf.Lerp(50f, 500f, Power);
+			MaxSpeed = Speed = Mathf.Lerp(50f, 200f, Power);
+			RotationSpeed = Mathf.Lerp(0.25f, 1f, Power);
+			GunSpeed = 500f;
+			DetectionDistance = Mathf.Lerp(400f, 1500f, Power);
 		} else if(TypeofVessel == "AA Gun"){
-			Health = 20f;
-			MaxSpeed = 100f; RotationSpeed = 1f;
+			Health  = Mathf.Lerp(20f, 200f, Power);
+			GunSpeed = 1000f;
+			DetectionDistance = Mathf.Lerp(250f, 2000f, Power);
 		} else if(TypeofVessel == "Balloon"){
-			Health = 30f;
-			MaxSpeed = 100f; RotationSpeed = 1f;
+			Health = Mathf.Lerp(30f, 300f, Power);
+			GunSpeed = 1000f;
+			DetectionDistance = Mathf.Lerp(250f, 2000f, Power);
 		}
 		Speed = MaxSpeed;
 
         // Set Positions
-
-        // Pick previous home
 		int pickedMarker = 0;
         if (TypeofVessel == "Messerschmitt" || TypeofVessel == "Messerschmitt K4" || TypeofVessel == "Messerschmitt 110" || TypeofVessel == "Messerschmitt Me 262"){
 			pickedMarker = 0;
 		} else if(TypeofVessel == "AA Gun"){
 			pickedMarker = 1;
+			Ray CheckGround = new(this.transform.position, Vector3.down);
+        	if (Physics.Raycast(CheckGround, out RaycastHit CheckGroundHit, 1000f))
+				this.transform.position = CheckGroundHit.point;
 		} else if(TypeofVessel == "Balloon"){
 			pickedMarker = 2;
 		}
@@ -114,28 +135,7 @@ public class EnemyVesselScript : MonoBehaviour {
 		}
 		// Find player
 
-		// Set Markers
-		if (PlayerActuall != null && IsDead == false) {
-			if (Vector3.Distance (this.transform.position, PlayerActuall.transform.position) > PlayerActuall.GetComponent<PlayerScript>().GunDistane) {
-				FarMarker.transform.GetChild(0).GetComponent<TextMesh>().text = ((Vector3.Distance (this.transform.position, PlayerActuall.transform.position) / 1000f).ToString() + "000").Substring(0, 4) + "km";
-				if(!FarMarker.activeSelf){
-					FarMarker.SetActive (true);
-					MarkerNear.SetActive (false);
-				}
-			} else {
-				MarkerNear.transform.GetChild (0).GetComponent<TextMesh> ().text = ((Vector3.Distance(this.transform.position, PlayerActuall.transform.position) / 1000f).ToString() + "000").Substring(0, 4) + "km";
-                if(FarMarker.activeSelf){
-					FarMarker.SetActive (false);
-					MarkerNear.SetActive (true);
-				}
-			}
-		} else {
-			if(FarMarker.activeSelf || MarkerNear.activeSelf){
-				FarMarker.SetActive (false);
-				MarkerNear.SetActive (false);
-			}
-		}
-		// Set Markers
+		Marker(QualitySettings.GetQualityLevel());
 
 		// Visual
 		if(Model.name == "Messerschmitt" || TypeofVessel == "Messerschmitt K4"){
@@ -147,6 +147,56 @@ public class EnemyVesselScript : MonoBehaviour {
 		}
 		// Visual
 		
+	}
+
+	void Marker(int Quality){
+
+		if(MarkerUpdate > 0f){
+
+			MarkerUpdate -= Time.deltaTime;
+
+		} else {
+
+			if (PlayerActuall != null && IsDead == false) {
+				Transform ChostMarker = null;
+				if (Vector3.Distance (this.transform.position, PlayerActuall.transform.position) > PlayerActuall.GetComponent<PlayerScript>().GunDistane) {
+					FarMarker.transform.GetChild(0).GetComponent<TextMesh>().text = ((Vector3.Distance (this.transform.position, PlayerActuall.transform.position) / 1000f).ToString() + "000").Substring(0, 4) + "km";
+					ChostMarker = FarMarker.transform;
+					if(!FarMarker.activeSelf){
+						FarMarker.SetActive (true);
+						MarkerNear.SetActive (false);
+					}
+				} else {
+					MarkerNear.transform.GetChild (0).GetComponent<TextMesh> ().text = ((Vector3.Distance(this.transform.position, PlayerActuall.transform.position) / 1000f).ToString() + "000").Substring(0, 4) + "km";
+	                ChostMarker = MarkerNear.transform;
+					if(FarMarker.activeSelf){
+						FarMarker.SetActive (false);
+						MarkerNear.SetActive (true);
+					}
+				}
+
+				ChostMarker.LookAt (Camera.transform.position, Camera.transform.up * 1f);
+				ChostMarker.localScale = Vector3.one * Vector3.Distance(this.transform.position, Camera.transform.position) * 0.2f;//new Vector3 (Vector3.Distance(this.transform.position, Camera.transform.position) * 0.2f, Vector3.Distance(this.transform.position, Camera.transform.position) * 0.2f, Vector3.Distance(this.transform.position, Camera.transform.position) * ScaleMultiplier);
+			
+				if(QualitySettings.GetQualityLevel() >= 1) {
+					Color SC = ChostMarker.GetComponent<SpriteRenderer>().color;
+					SC.a = Mathf.Lerp(1f, 0.1f, Quaternion.Angle (Quaternion.Euler(Camera.transform.eulerAngles.x, Camera.transform.eulerAngles.y, 0f), Quaternion.LookRotation (ChostMarker.position - Camera.transform.position)) / Mathf.Lerp(360f, 30f, (Vector3.Distance (this.transform.position, PlayerActuall.transform.position)-DetectionDistance) / DetectionDistance));
+					ChostMarker.GetComponent<SpriteRenderer>().color = ChostMarker.GetChild(0).GetComponent<TextMesh>().color = SC;
+				}
+
+				if(QualitySettings.GetQualityLevel() == 2) MarkerUpdate = 0.04f;
+				else if(QualitySettings.GetQualityLevel() == 1) MarkerUpdate = 0.1f;
+				else if(QualitySettings.GetQualityLevel() == 0) MarkerUpdate = 0.25f;
+
+			} else {
+				if(FarMarker.activeSelf || MarkerNear.activeSelf){
+					FarMarker.SetActive (false);
+					MarkerNear.SetActive (false);
+				}
+			}
+
+		}
+
 	}
 
 	void FixedUpdate(){
@@ -193,7 +243,7 @@ public class EnemyVesselScript : MonoBehaviour {
 		// Diving too fast
 
 		// Move forward
-		FlyingTowards = Vector3.Lerp(FlyingTowards, this.transform.forward, Mathf.Clamp((Speed / MaxSpeed) - 0.3f, 0f, 1f) * 0.05f);
+		FlyingTowards = Vector3.Lerp(FlyingTowards, this.transform.forward, Mathf.Clamp((Speed / MaxSpeed), 0f, 1f) * 0.03f);
 		this.transform.position += FlyingTowards  * (Speed/90f);
 		// Move forward
 
@@ -251,7 +301,7 @@ public class EnemyVesselScript : MonoBehaviour {
 		// Flaps and rudder
 
 		// Lift force
-		this.transform.position += Vector3.up*-0.5f + this.transform.up*Mathf.Lerp(0.5f, 0.75f, Speed/MaxSpeed);
+		this.transform.position += Vector3.down*0.5f + Vector3.Lerp(this.transform.up, Vector3.down, Stalling / 3f) * Mathf.Lerp(0.25f, 0.75f, Speed/MaxSpeed);
 		// Lift force
 
 		// Stalling
@@ -260,8 +310,8 @@ public class EnemyVesselScript : MonoBehaviour {
 
 		if(Stalling > 0f){
             Stalling -= 0.01f;
-			this.transform.position += Vector3.up * -0.1f;
-			this.transform.eulerAngles += new Vector3(Mathf.Lerp(0f, Stalling, AngleX*10f), 0f, 0f);
+			this.transform.position += Vector3.up * -0.1f; 
+			this.transform.eulerAngles += new Vector3(Mathf.Lerp(Stalling*2f, 0f, (AngleX-0.5f)*2f), 0f, 0f);
 		}
 		// Stalling
 
@@ -273,7 +323,7 @@ public class EnemyVesselScript : MonoBehaviour {
         if (Paintballed <= 0f){
 			PointofInterest = new Vector3(
 				PointofInterest.x,
-				Mathf.Clamp(PointofInterest.y, this.transform.position.y-1000f, this.transform.position.y+10f),
+				Mathf.Clamp(PointofInterest.y, this.transform.position.y-2000f, this.transform.position.y+10f),
 				PointofInterest.z
 			);
 			PointThere.LookAt(PointofInterest);
@@ -285,21 +335,20 @@ public class EnemyVesselScript : MonoBehaviour {
         // ChooseOption
         string WhichOne;
         // Check for collision
-        
-        RaycastHit CheckGroundHit;
-        Ray CheckGround = new Ray(this.transform.position, this.transform.forward);
-        if (Physics.Raycast(CheckGround, out CheckGroundHit, Speed * 20f)){
-            if (CheckGroundHit.collider != null && CheckGroundHit.collider.GetComponent<EnemyVesselScript>() == null && CheckGroundHit.collider.tag != "Player"){
+
+        Ray CheckGround = new(this.transform.position, this.transform.forward);
+        if (Physics.Raycast(CheckGround, out RaycastHit CheckGroundHit, Speed * 10f)){
+            if (CheckGroundHit.collider != null && CheckGroundHit.collider.GetComponent<EnemyVesselScript>() == null && CheckGroundHit.collider.tag != "Cloud" && !(CheckGroundHit.collider.tag == "Player" && Time.timeSinceLevelLoad % 4f < 2f) ){
                 PullUpMultiplier = 3f;
             }
         }
-		if(this.transform.position.y < 25f) PullUpMultiplier = 3f;
+		if(this.transform.position.y < 100f) PullUpMultiplier = 3f;
         // Check for collision
         if (PullUpMultiplier > 0f) {
 			WhichOne = "PullUp";
             PullUpMultiplier -= 0.1f;
 		} else if (PlayerSeen != null) {
-			if (Vector3.Distance (this.transform.position, PlayerSeen.transform.position) < 1500f) {
+			if (Vector3.Distance (this.transform.position, PlayerSeen.transform.position) < DetectionDistance) {
 				WhichOne = "Dogfight";
 			} else {
 				WhichOne = "Patrol";
@@ -310,7 +359,7 @@ public class EnemyVesselScript : MonoBehaviour {
 		// ChooseOption
 		// Set gun distance
 		float GunDistance = 300f;
-		if(TypeofVessel == "Messerschmitt Me 262") GunDistance = 500f;
+		if(TypeofVessel == "Messerschmitt Me 262") GunDistance = 1000f;
 		// Set gun distance
 		if (WhichOne == "Patrol") {
 			if (Change <= 0f || Vector3.Distance(this.transform.position, PointofInterest) < 100f) {
@@ -322,8 +371,8 @@ public class EnemyVesselScript : MonoBehaviour {
 		} else if (WhichOne == "PullUp"){
             PointofInterest = this.transform.position + this.transform.forward*10f + Vector3.up;
 		} else if(WhichOne == "Dogfight"){
-			PointofInterest = PlayerSeen.transform.position;
-			if (Vector3.Distance (this.transform.position, PlayerSeen.transform.position) < GunDistance && Quaternion.Angle (this.transform.rotation, Quaternion.LookRotation (PointofInterest - this.transform.position)) < 10f) {
+			PointofInterest = Lead(PlayerSeen);
+			if (Vector3.Distance (this.transform.position, PlayerSeen.transform.position) < GunDistance && Quaternion.Angle (this.transform.rotation, Quaternion.LookRotation (PointofInterest - this.transform.position)) < 5f) {
 				if (GunCooldown <= 0f && Paintballed <= 0f) {
 					if (TypeofVessel == "Messerschmitt") {
 						GunCooldown = 0.1f;
@@ -344,7 +393,7 @@ public class EnemyVesselScript : MonoBehaviour {
 				if (Vector3.Distance (this.transform.position, PlayerSeen.transform.position) < 200f && Quaternion.Angle (this.transform.rotation, Quaternion.LookRotation (PointofInterest - this.transform.position)) > 90f) {
 					if (GunCooldown <= 0f) {
 						GunCooldown = 0.1f;
-						Shoot("Vickers", PointofInterest, this.transform);
+						Shoot("Vickers", Lead(PlayerSeen), this.transform);
 					}
 				}
 			}
@@ -360,6 +409,19 @@ public class EnemyVesselScript : MonoBehaviour {
 		BulletA.GetComponent<ProjectileScript> ().TypeofGun = What;
 		BulletA.GetComponent<ProjectileScript> ().WhoShot = this.gameObject;
 		BulletA.GetComponent<ProjectileScript> ().GunFirePos = Slimend;
+	}
+
+	Vector3 Lead(GameObject Target){
+		Vector3[] Pos = new Vector3[]{};
+		float[] Speeds = new float[]{};
+
+		if(Target.tag == "Player"){
+			Pos = new Vector3[]{Target.transform.position, (Target.transform.position - Target.GetComponent<PlayerScript>().PrevPos).normalized};//Target.GetComponent<PlayerScript>().FlyingTowards};
+			Speeds = new float[]{Target.GetComponent<PlayerScript>().Speed, GunSpeed};
+		}
+
+		float TimeNeeded = Vector3.Distance(this.transform.position, Pos[0]) / Speeds[1];
+		return Pos[0] + Pos[1]*TimeNeeded*Speeds[0];
 	}
 
 	void AAGun(){
@@ -378,9 +440,9 @@ public class EnemyVesselScript : MonoBehaviour {
 			if(Vector3.Distance(this.transform.position, PlayerSeen.transform.position) < 750f){
 				PointofInterest = PlayerSeen.transform.position;
 				if (GunCooldown <= 0f && Paintballed <= 0f) {
-					GunCooldown = 1f;
+					GunCooldown = Mathf.Lerp(5f, 0.5f, Power);
 					int PickGun = Random.Range (0, 1);
-					Shoot("Flak", PointofInterest, Model.transform.GetChild (PickGun));
+					Shoot("Flak", Lead(PlayerSeen) + Vector3.Lerp(new Vector3(Random.Range(-10f, 10f), Random.Range(0f, 5f), Random.Range(-10f, 10f)), Vector3.zero, Power), Model.transform.GetChild (PickGun));
 				}
 			}
 		}
@@ -403,13 +465,8 @@ public class EnemyVesselScript : MonoBehaviour {
 			if(Vector3.Distance(this.transform.position, PlayerSeen.transform.position) < 750f){
 				PointofInterest = PlayerSeen.transform.position;
 				if (GunCooldown <= 0f && Paintballed <= 0f) {
-					GunCooldown = 1f;
-					GameObject BulletA = Instantiate (Bullet) as GameObject;
-					BulletA.transform.position = Model.transform.GetChild (0).position + (Model.transform.GetChild(0).forward * 1f);
-                    BulletA.transform.LookAt (BulletA.transform.position + (Model.transform.GetChild (0).forward * 2f));
-					BulletA.GetComponent<ProjectileScript> ().TypeofGun = "Flak";
-					BulletA.GetComponent<ProjectileScript> ().WhoShot = this.gameObject;
-					BulletA.GetComponent<ProjectileScript> ().GunFirePos = this.transform;
+					GunCooldown = Mathf.Lerp(5f, 0.5f, Power);
+					Shoot("Flak", Lead(PlayerSeen) + Vector3.Lerp(new Vector3(Random.Range(-10f, 10f), Random.Range(0f, 5f), Random.Range(-10f, 10f)), Vector3.zero, Power), Model.transform.GetChild (0));
 				}
 			}
 		}
@@ -467,6 +524,7 @@ public class EnemyVesselScript : MonoBehaviour {
 			ByeBye.GetComponent<PlaneDead>().PreviousSpeed = Speed;
 			ByeBye.GetComponent<PlaneDead>().PreviousRotation = ElevatorFlapsRudder;
 			Model.transform.SetParent(ByeBye.transform);
+			ByeBye.GetComponent<PlaneDead>().PlaneModel = Model;
 			Destroy(this.gameObject);
 
 		}

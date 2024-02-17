@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class PlayerScript : MonoBehaviour {
 
@@ -44,8 +46,9 @@ public class PlayerScript : MonoBehaviour {
 	public float MaxFuel = 180f;
 	public float Fuel = 180f;
 
-	public int Ammo = 100;
-	public int MaxAmmo = 100;
+	public float Heat = 0f;
+	public float MaxHeat = 1f;
+	public float HeatDispare = 1f;
 	public float MaxGunCooldown = 1f;
 	public float GunCooldown = 0f;
 	float AmountOfGuns = 0f;
@@ -75,6 +78,7 @@ public class PlayerScript : MonoBehaviour {
 	Vector2 PTturn;
     public string WhichCamera = "Normal";
 	Vector3 FlyingTowards;
+	public Vector3 PrevPos;
 	// Mechanics
 
 	// Screen Shake
@@ -95,6 +99,8 @@ public class PlayerScript : MonoBehaviour {
 	public Color32 PlaneColor2;
 	bool BeyondMap = false;
 	public float Flares = 0f;
+	public float Intro = 5f;
+	int IntroZoom = 0;
 	// Misc
 
 	void Start () {
@@ -109,31 +115,45 @@ public class PlayerScript : MonoBehaviour {
 		SpecialType = GS.CurrentSpecialType;
 		Addition = GS.CurrentAddition;
 		Paint = GS.CurrentPaint;
-		if (GS.InvertedMouse == false) {
-			Inverted = -1f;
-		} else {
-			Inverted = 1f;
-		}
 
+		if (GS.InvertedMouse == true) Inverted = 1f;
+		if (GS.ControlScheme == 1) ControlType = "Point";
 
 		MainCanvas = GameObject.Find ("MainCanvas");
 		PlaneSettings (1);
 		SetStats ();
 
 		PointThere.SetParent(null);
+		IntroZoom = 0;//(int)Random.Range(0f, 2.9f);
 		
 	}
 
 	void FixedUpdate () {
 
 		PlaneSettings (0);
-		Mechanics ();
-		Controlling ();
+		if(Intro > 0f){
+			Intro -= 0.02f;
+		} else {
+			Mechanics ();
+			Controlling ();
+		}
 
 		// Values
 		Health = Mathf.Clamp(Health, 0f, MaxHealth);
 		Fuel = Mathf.Clamp(Fuel, 0f, MaxFuel);
-		Ammo = Mathf.Clamp (Ammo, 0, MaxAmmo);
+		if(Heat > 0f){
+			if(GunCooldown <= -0.9f) {
+				float mainheat = Heat;
+				Heat = Mathf.Clamp (Heat - (0.02f*(MaxHeat/HeatDispare)), 0f, MaxHeat*2f);
+			}
+			if(Heat > MaxHeat) {
+				Heat = -MaxHeat - 10f;
+				MainCanvas.GetComponent<CanvasScript> ().SetInfoText ("Gun overheated!", "Broń się przegrzała!", new Color32 (255, 0, 0, 255), 1.5f);
+			}
+		} else if (Heat <= -10f) {
+			Heat = Mathf.Clamp (Heat + 0.02f*(MaxHeat/HeatDispare), -Mathf.Infinity, -10f);
+			if(Heat >= -10f) Heat = 0f;
+		}
         float LowFuelMultiplier;
         if (Fuel > (MaxFuel / 5f)) {
             if (Addition == "Boost") LowFuelMultiplier = 1.5f;
@@ -154,11 +174,11 @@ public class PlayerScript : MonoBehaviour {
             }
         }
 
-		if(GunCooldown > 0f)GunCooldown -= 0.01f;
+		if(GunCooldown > -1f)GunCooldown -= 0.02f;
 		if(Flares > 0f) Flares -= 0.01f;
 		if(PresentCooldown > 0f){
 			if (AirplaneClass == "Bomber") {
-				PresentCooldown -= 0.02f;
+				PresentCooldown -= 0.03f;
 			} else {
 				PresentCooldown -= 0.01f;
 			}
@@ -168,71 +188,82 @@ public class PlayerScript : MonoBehaviour {
 		// Values
 
 		// Camera
+		if(Intro <= 0f){
+			if (ControlType == "Point") {
 
-		if (ControlType == "Point") 
-		{
-
-			if (Input.GetButton("Free Look")) {
-	            WhichCamera = "Free";
-			} else if (Input.GetButton("Aim")) {
-	            if (Addition == "Turret"){
-        	        WhichCamera = "Turret";
+				if (Input.GetButton("Free Look")) {
+	            	WhichCamera = "Free";
+				} else if (Input.GetButton("Aim")) {
+	    	        if (Addition == "Turret"){
+    	    	        WhichCamera = "Turret";
+					} else {
+						WhichCamera = "Aim";
+					}
 				} else {
-					WhichCamera = "Aim";
+					WhichCamera = "Normal";
 				}
+
+				Camera.transform.position = this.transform.position + this.transform.up * 2f + PointThere.forward*-15f + ShakeScreen;
+				Camera.transform.LookAt(PointThere.position + PointThere.forward*1000f);
+				Cursor.lockState = CursorLockMode.Locked;
+
 			} else {
-				WhichCamera = "Normal";
+
+				if (Input.GetButton("Free Look") || Quaternion.Angle(FreeLook.transform.localRotation, Quaternion.identity) > 1f) {
+	    	        WhichCamera = "Free";
+
+    	    	    // Rotate Camera
+	            	Camera.transform.position = FreeLook.transform.position + this.transform.up*2f + (FreeLook.transform.forward * -15f);
+	            	Camera.transform.LookAt (FreeLook.transform.position + FreeLook.transform.forward * 1000f, this.transform.up);
+    	    	    if (Input.GetButton("Free Look")) FreeLook.transform.localRotation = Quaternion.Lerp(FreeLook.transform.localRotation, Quaternion.Euler(-90f * SteerPosition.y, 180f * SteerPosition.x, 0f), 0.1f);
+        		    else FreeLook.transform.localRotation = Quaternion.Lerp(FreeLook.transform.localRotation, Quaternion.identity, 0.5f);
+					// Rotate Camera
+				} else if(Input.GetButton("Aim") && Addition == "Turret"){
+        		    WhichCamera = "Turret";
+        	        Camera.transform.position = Turret.transform.GetChild(0).position + (ShakeScreen / 10f);
+    	        	Camera.transform.rotation = Turret.transform.GetChild(0).rotation;
+		            Turret.transform.GetChild(0).localRotation = Quaternion.Euler(Mathf.Clamp((-60f * SteerPosition.y), -90f, 30f), 200f * SteerPosition.x, 0f);
+	            	Turret.transform.GetChild(3).rotation = Quaternion.Slerp(Turret.transform.GetChild(3).rotation, Turret.transform.GetChild(0).rotation, 0.25f);
+
+	        	    Turret.transform.GetChild(3).gameObject.SetActive(true);
+    		        Turret.transform.GetChild(1).gameObject.SetActive(false);
+    	            Turret.transform.GetChild(2).gameObject.SetActive(true);
+				} else {
+					if(Input.GetButton("Aim")) WhichCamera = "Aim";
+    		        else WhichCamera = "Normal";
+					float divASC = (Camera.GetComponent<Camera> ().fieldOfView-30f) / 30f;
+	        	    Vector3 AddSteerCamera = this.transform.right * ((ElevatorFlapsRudder.z - ElevatorFlapsRudder.y) * -2f) + this.transform.up * (ElevatorFlapsRudder.x * -2f);
+					Camera.transform.position = AddSteerCamera*divASC + (this.transform.position + ShakeScreen) + (this.transform.forward * -5f) + (this.transform.forward * (Speed / MaxSpeed) * -10f) + (this.transform.up * Mathf.Lerp(4f, 2f, divASC) );
+					//Camera.transform.LookAt (Camera.transform.position + (this.transform.forward * 1f), this.transform.up * 1f);
+					MainCanvas.GetComponent<CanvasScript> ().Crosshair.transform.localScale = Vector3.one*0.1f;
+					Camera.transform.LookAt (FreeLook.transform.position + FreeLook.transform.forward * 1000f, this.transform.up);
+				}
+
 			}
+		} else {
 
-			Camera.transform.position = this.transform.position + this.transform.up * 2f + PointThere.forward*-15f;
-			Camera.transform.LookAt(PointThere.position + PointThere.forward*1000f);
-			Cursor.lockState = CursorLockMode.Locked;
-
-		}
-		else
-		{
-
-			if (Input.GetButton("Free Look")) {
-	            WhichCamera = "Free";
-
-        	    // Rotate Camera
-            	Camera.transform.position = FreeLook.transform.position + (FreeLook.transform.forward * -10f);
-	            Camera.transform.LookAt (FreeLook.transform.position, FreeLook.transform.up * 1f);
-    	        FreeLook.transform.localRotation = Quaternion.Euler(-90f * SteerPosition.y, 180f * SteerPosition.x, 0f);
-        	    // Rotate Camera
-			} else if(Input.GetButton("Aim")){
-    	        if (Addition == "Turret"){
-        	        WhichCamera = "Turret";
-            	    Camera.transform.position = Turret.transform.GetChild(0).position + (ShakeScreen / 10f);
-                	Camera.transform.rotation = Turret.transform.GetChild(0).rotation;
-	                Turret.transform.GetChild(0).localRotation = Quaternion.Euler(Mathf.Clamp((-60f * SteerPosition.y), -90f, 30f), 200f * SteerPosition.x, 0f);
-    	            Turret.transform.GetChild(3).rotation = Quaternion.Slerp(Turret.transform.GetChild(3).rotation, Turret.transform.GetChild(0).rotation, 0.25f);
-
-	                Turret.transform.GetChild(3).gameObject.SetActive(true);
-    	            Turret.transform.GetChild(1).gameObject.SetActive(false);
-        	        Turret.transform.GetChild(2).gameObject.SetActive(true);
-            	} else {
-                	WhichCamera = "Aim";
-	                Camera.transform.position = AimPart.transform.position + (ShakeScreen / 10f);
-    	            Camera.transform.LookAt(Camera.transform.position + (this.transform.forward * 1f), this.transform.up * 1f);
-            	}
-			} else {
-    	        WhichCamera = "Normal";
-        	    Vector3 AddSteerCamera = ((this.transform.right * (ElevatorFlapsRudder.z * -2f)) + (this.transform.up * (ElevatorFlapsRudder.x * -2f)));
-				Camera.transform.position = AddSteerCamera + ((this.transform.position + ShakeScreen) + (this.transform.forward * -5f) + ((this.transform.forward * (Speed / MaxSpeed)) * -10f) + (this.transform.up * 2f));
-				Camera.transform.LookAt (Camera.transform.position + (this.transform.forward * 1f), this.transform.up * 1f);
-				MainCanvas.GetComponent<CanvasScript> ().Crosshair.transform.localScale = Vector3.one*0.1f;
+			switch(IntroZoom){
+				case 0:
+					Camera.transform.LookAt(this.transform.position + this.transform.up*2f + this.transform.forward*10f);
+					Camera.transform.position = this.transform.position + this.transform.up*2f + this.transform.forward*-Mathf.Lerp(15f, -500f, Intro*Intro/25f) + this.transform.right*Mathf.Sin(Intro*Intro/25f)*250f;
+					Camera.GetComponent<Camera>().fieldOfView = Mathf.Lerp(60f, 10f, Intro/5f);
+					break;
+				case 1:
+					Camera.transform.LookAt(this.transform.position + this.transform.up*2f + this.transform.forward*1000f);
+					Camera.transform.position = this.transform.position + this.transform.up*Mathf.Lerp(2f, 10f, Intro/5f) + this.transform.forward*Mathf.Lerp(-15f, 5f, Intro/5f);
+					Camera.GetComponent<Camera>().fieldOfView = Mathf.Lerp(60f, 10f, Intro/5f);
+					break;
 			}
 
 		}
 
         float DesiredPOV;
-        if (WhichCamera == "Aim") {
-			if (Addition == "Zoom") DesiredPOV = 20f;
-			else if (ControlType == "Point") DesiredPOV = 20f;
-			else DesiredPOV = 60f;
+        if (WhichCamera == "Aim" || WhichCamera == "Turret") {
+			if (Addition == "Zoom") DesiredPOV = 10f;
+			else DesiredPOV = 30f;
 		} else {
-			DesiredPOV = 60f;
+			if(WhichCamera == "Free") DesiredPOV = 80f;
+			else DesiredPOV = 60f;
             if (Addition == "Turret" && WhichCamera != "Turret") {
                 Turret.transform.GetChild(3).gameObject.SetActive(false);
                 Turret.transform.GetChild(1).gameObject.SetActive(true);
@@ -249,14 +280,12 @@ public class PlayerScript : MonoBehaviour {
 			myParticleSystem = Smoke.GetComponent<ParticleSystem> ();
 			emissionModule = myParticleSystem.emission;
 			emissionModule.rateOverTime = 200f - ((Health / (MaxHealth / 3f)) * 200f);
-			Smoke.GetComponent<AudioSource> ().Play ();
-			Smoke.GetComponent<AudioSource> ().volume = (1f - (Health / (MaxHealth / 3f) * 1f)) * GS.AudioVolume;
+			Smoke.GetComponent<AudioSource> ().volume = (1f - (Health / (MaxHealth / 3f) * 1f)) * GS.Volumes[0]*GS.Volumes[2];
 			Smoke.GetComponent<AudioSource> ().pitch = Random.Range (0.8f, 1.2f);
 		} else {
 			ParticleSystem myParticleSystem;
 			ParticleSystem.EmissionModule emissionModule;
 			myParticleSystem = Smoke.GetComponent<ParticleSystem> ();
-			Smoke.GetComponent<AudioSource> ().Stop ();
 			emissionModule = myParticleSystem.emission;
 			emissionModule.rateOverTime = 0f;
 			Smoke.GetComponent<AudioSource> ().volume = 0f;
@@ -332,6 +361,7 @@ public class PlayerScript : MonoBehaviour {
             Corpse.GetComponent<PlaneDead>().PreviousSpeed = Speed;
             Corpse.GetComponent<PlaneDead>().PreviousRotation = ElevatorFlapsRudder;
 			CurrentPlane.transform.SetParent(Corpse.transform);
+			Corpse.GetComponent<PlaneDead>().PlaneModel = CurrentPlane;
             Destroy(this.gameObject);
 
             if (GS.Parachutes <= 0){
@@ -430,6 +460,7 @@ public class PlayerScript : MonoBehaviour {
 							SelectedPart.gameObject.SetActive (true);
 							SelectedPart.transform.Rotate (new Vector3 (Speed / -10f, 0f, 0f));
 							SelectedPart.gameObject.GetComponent<AudioSource> ().pitch = (Speed / MaxSpeed / 2f) * Throttle;
+							SelectedPart.gameObject.GetComponent<AudioSource> ().volume = GS.Volumes[0] * GS.Volumes[2];
 						} else {
 							SelectedPart.gameObject.SetActive (false);
 							SelectedPart.gameObject.GetComponent<AudioSource> ().Stop ();
@@ -446,6 +477,7 @@ public class PlayerScript : MonoBehaviour {
 							}
 							SelectedPart.transform.GetChild(0).Rotate (new Vector3 (Speed / -10f, 0f, 0f));
         	                SelectedPart.gameObject.GetComponent<AudioSource>().pitch = (Speed / MaxSpeed / 2f) * Throttle;
+							SelectedPart.gameObject.GetComponent<AudioSource> ().volume = GS.Volumes[0] * GS.Volumes[2];
     	                } else {
 							SelectedPart.gameObject.SetActive (false);
 							SelectedPart.gameObject.GetComponent<AudioSource> ().Stop ();
@@ -463,6 +495,7 @@ public class PlayerScript : MonoBehaviour {
 							ParticleSystem.MainModule JE = SelectedPart.transform.GetChild(0).GetComponent<ParticleSystem> ().main;
 							JE.startColor = new Color(1f, 1f, 1f, (Mathf.Clamp((Speed / MaxSpeed) * (0.5f * Throttle), 0f, 255f)));
 							SelectedPart.gameObject.GetComponent<AudioSource> ().pitch = Speed / MaxSpeed * Throttle;
+							SelectedPart.gameObject.GetComponent<AudioSource> ().volume = GS.Volumes[0] * GS.Volumes[2];
 						} else {
 							SelectedPart.gameObject.SetActive (false);
 							SelectedPart.gameObject.GetComponent<AudioSource> ().Stop ();
@@ -481,6 +514,7 @@ public class PlayerScript : MonoBehaviour {
 							ParticleSystem.MainModule DJE = SelectedPart.transform.GetChild(0).GetComponent<ParticleSystem> ().main;
 							DJE.startColor = new Color(1f, 1f, 1f, (Mathf.Clamp((Speed / MaxSpeed) * (0.5f * Throttle), 0f, 255f)));
         	                SelectedPart.gameObject.GetComponent<AudioSource> ().pitch = Speed / MaxSpeed * Throttle;
+							SelectedPart.gameObject.GetComponent<AudioSource> ().volume = GS.Volumes[0] * GS.Volumes[2];
 						} else {
 							SelectedPart.gameObject.SetActive (false);
 							SelectedPart.gameObject.GetComponent<AudioSource> ().Stop ();
@@ -491,6 +525,7 @@ public class PlayerScript : MonoBehaviour {
 							SelectedPart.gameObject.SetActive (true);
 							float SetPitch = Mathf.Clamp ((Speed / MaxSpeed) * Throttle, 0.75f, 2f);
 							SelectedPart.gameObject.GetComponent<AudioSource> ().pitch = SetPitch;
+							SelectedPart.gameObject.GetComponent<AudioSource> ().volume = GS.Volumes[0] * GS.Volumes[2];
 						} else {
 							SelectedPart.gameObject.SetActive (false);
 							SelectedPart.gameObject.GetComponent<AudioSource> ().Stop ();
@@ -533,7 +568,8 @@ public class PlayerScript : MonoBehaviour {
 		// Diving too fast
 
 		// Move forward
-		FlyingTowards = Vector3.Lerp(FlyingTowards, this.transform.forward, Mathf.Clamp((Speed / MaxSpeed) - 0.3f, 0f, 1f) * 0.05f);
+		PrevPos = this.transform.position;
+		FlyingTowards = Vector3.Lerp(FlyingTowards, this.transform.forward, Mathf.Clamp((Speed / MaxSpeed), 0f, 1f) * 0.03f);
 		this.transform.position += FlyingTowards  * (Speed/90f);
 		// Move forward
 
@@ -561,7 +597,7 @@ public class PlayerScript : MonoBehaviour {
 		float RotationalSpeed = Speed / MaxSpeed;
 		this.transform.Rotate(ElevatorFlapsRudder * (RotationSpeed * RotationalSpeed)); // Turning speed
 		this.transform.Rotate(new Vector3 (0f, AngleZ / 2f * RotationSpeed, 0f));
-		this.transform.eulerAngles += new Vector3 ((CF / 2f) * (RotationSpeed * RotationalSpeed), 0f, 0f);
+		this.transform.eulerAngles += new Vector3 (CF / 2f * RotationSpeed, 0f, 0f);
 
 		if(ControlType == "Point")
 		{
@@ -581,7 +617,7 @@ public class PlayerScript : MonoBehaviour {
 				Vector3.Lerp(
 					new Vector3(
 						Mathf.Clamp(TurnX / 10f, -1f, 1f),
-						Mathf.Clamp(TurnY / 10f, -0.3f, 0.3f),
+						Mathf.Clamp(TurnY / 10f, -1f, 1f),
 						Mathf.Clamp(AngleZ * 10f, -1f, 1f)
 					)
 				,
@@ -640,7 +676,7 @@ public class PlayerScript : MonoBehaviour {
 		// Flaps and rudder
 
 		// Lift force
-		this.transform.position += Vector3.up*-0.5f + this.transform.up*Mathf.Lerp(0.5f, 0.75f, Speed/MaxSpeed);
+		this.transform.position += Vector3.down*0.5f + Vector3.Lerp(this.transform.up, Vector3.down, Stalling / 3f) * Mathf.Lerp(0.25f, 0.75f, Speed/MaxSpeed);
 		// Lift force
 
 		// Stalling
@@ -665,20 +701,22 @@ public class PlayerScript : MonoBehaviour {
 
 		// Shooting
 		if(Input.GetButton("Fire")){
-			if(GunCooldown <= 0f && Ammo > 0){
-				Ammo -= 1;
+			if(GunCooldown <= 0f && Heat >= 0f){
                 if (WhichCamera == "Turret") {
 					Vector3 PickedPosition = Turret.transform.GetChild(0).GetChild(0).position;
-					GameObject TurretBullet = Shoot("Main", PickedPosition, Turret.transform.GetChild(0).GetChild(0), PickedPosition + this.transform.forward);
+					GameObject TurretBullet = Shoot("Main", PickedPosition, Turret.transform.GetChild(0).GetChild(0), PickedPosition + Camera.transform.forward);
                     GunCooldown = MaxGunCooldown;
+					Heat += MaxGunCooldown;
                     if (GunType == "Paintball") TurretBullet.GetComponent<ProjectileScript>().PresentColor1 = Color.HSVToRGB(Random.Range(0f, 1f), 1f, 0.5f);
                 } else {
                     GameObject PickedGun = Guns.ToArray()[Random.Range(0, Guns.Count)];
 					GameObject MainBullet = Shoot("Main", PickedGun.transform.position, PickedGun.transform, PickedGun.transform.position + this.transform.forward);
                     if (AirplaneClass == "Striker") {
-                        GunCooldown = (MaxGunCooldown / 2) / AmountOfGuns;
+                        GunCooldown = MaxGunCooldown / 2 / AmountOfGuns;
+						Heat += MaxGunCooldown / 2 / AmountOfGuns;
                     } else {
                         GunCooldown = MaxGunCooldown / AmountOfGuns;
+						Heat += MaxGunCooldown / AmountOfGuns;
                     }
                     if (GunType == "Paintball") MainBullet.GetComponent<ProjectileScript>().PresentColor1 = Color.HSVToRGB(Random.Range(0f, 1f), 1f, 0.5f);
                 }
@@ -723,9 +761,8 @@ public class PlayerScript : MonoBehaviour {
             {
                 MainCanvas.GetComponent<CanvasScript>().SetInfoText("You don't have any special!", "Nie masz żadnego ekwipunku specjalnego!", new Color32(255, 0, 0, 255), 1f);
             }
-            if (SpecialCooldown <= 0f && Ammo >= SpecialRequiredAmmo){
+            if (SpecialCooldown <= 0f){
 				SpecialCooldown = MaxSpecialCooldown;
-				Ammo -= SpecialRequiredAmmo;
                 if(SpecialType == "Wrenches"){
 					Health += MaxHealth / 4f;
 					MainCanvas.GetComponent<CanvasScript> ().FlashImage.color = new Color32 (0, 155, 0, 255);
@@ -799,30 +836,31 @@ public class PlayerScript : MonoBehaviour {
 		}
 
 		switch(EngineModel){
-			case "Double Propeller": MaxSpeed *= 1.25f; break;
-			case "Jet Engine": MaxSpeed *= 2f; break;
-			case "Double Jet Engine": MaxSpeed *= 2.5f; break;
-			case "Magic Reindeer Dust": MaxSpeed *= 3f; break;
+			case "Double Propeller": MaxSpeed *= 1.25f; RotationSpeed *= 1.25f; break;
+			case "Jet Engine": MaxSpeed *= 1.5f; RotationSpeed *= 1.5f; break;
+			case "Double Jet Engine": MaxSpeed *= 1.75f; RotationSpeed *= 1.75f; break;
+			case "Magic Reindeer Dust": MaxSpeed *= 2f; RotationSpeed *= 2f; break;
 		}
 
 		float[] GTvars = new float[]{0f, 0f, 0f};
 		switch(GunType){
-			case "Vickers": GTvars = new float[]{400f, 0.1f, 100f}; break;
-			case "M2 Browning": GTvars = new float[]{600f, 0.075f, 100f}; break;
-			case "M3 Browning": GTvars = new float[]{600f, 0.075f, 75f}; break;
-			case "Cannon": GTvars = new float[]{300f, 0.2f, 50f}; break;
-			case "Flammable": GTvars = new float[]{400f, 0.1f, 100f}; break;
-			case "Mugger Missiles": GTvars = new float[]{400f, 0.1f, 100f}; break;
-			case "Flak": GTvars = new float[]{750f, 0.4f, 50f}; break;
-			case "Jet Gun": GTvars = new float[]{1000f, 0.05f, 150f}; break;
-			case "Laser": GTvars = new float[]{500f, 0.075f, 75f}; break;
-	        case "Blue Laser": GTvars = new float[]{1000f, 0.075f, 75f}; break;
-			case "Paintball": GTvars = new float[]{600f, 0.1f, 100f}; break;
-			case "Rocket": GTvars = new float[]{600f, 0.4f, 25f}; break;
+			case "Vickers": GTvars = new float[]{400f, 0.1f, 3f, 5f}; break;
+			case "M2 Browning": GTvars = new float[]{600f, 0.075f, 3f, 5f}; break;
+			case "M3 Browning": GTvars = new float[]{600f, 0.075f, 5f, 5f}; break;
+			case "Cannon": GTvars = new float[]{300f, 0.2f, 3f, 6f}; break;
+			case "Flammable": GTvars = new float[]{400f, 0.1f, 3f, 5f}; break;
+			case "Mugger Missiles": GTvars = new float[]{400f, 0.1f, 3f, 5f}; break;
+			case "Flak": GTvars = new float[]{750f, 0.4f, 30f, 9999f}; break;
+			case "Jet Gun": GTvars = new float[]{1000f, 0.05f, 7.5f, 5f}; break;
+			case "Laser": GTvars = new float[]{500f, 0.075f, 15f, 9999f}; break;
+	        case "Blue Laser": GTvars = new float[]{1000f, 0.075f, 15f, 9999f}; break;
+			case "Paintball": GTvars = new float[]{600f, 0.1f, 5f, 10f}; break;
+			case "Rocket": GTvars = new float[]{600f, 0.4f, 15f, 9999f}; break;
 		}
 		GunDistane = GTvars[0];
 		MaxGunCooldown = GTvars[1];
-		MaxAmmo = (int)GTvars[2];
+		MaxHeat = GTvars[2];
+		HeatDispare = GTvars[3];
 
 		float[] PCvars = new float[]{0f, 0f};
 		switch(PresentCannonType){
@@ -864,14 +902,12 @@ public class PlayerScript : MonoBehaviour {
 		PlaneColor1 = PC[0];
 		PlaneColor2 = PC[1];
 
-        MaxAmmo *= (int)AmountOfGuns;
-
-        if (AirplaneClass == "Striker")MaxAmmo *= 2;
-        if (Addition == "Ammo Pack") MaxAmmo *= 3;
+        if (AirplaneClass == "Striker")MaxHeat *= 2;
+        if (Addition == "Ammo Pack") MaxHeat *= 3;
 
 		Health = MaxHealth;
 		Fuel = MaxFuel;
-		Ammo = MaxAmmo;
+		Heat = 0;
 		Speed = MaxSpeed;
 
 

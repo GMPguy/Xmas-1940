@@ -27,6 +27,10 @@ public class CanvasScript : MonoBehaviour {
 	public Text MooneyScore;
     public Image PIcon;
     public Text PText;
+    // While intro
+    public Transform IntroWindow;
+    string[] IntroTextes;
+    float IntroTime = 0f;
 	// Flash
 	public Image FlashImage;
 	public float DisappearSpeed = 1f;
@@ -60,24 +64,66 @@ public class CanvasScript : MonoBehaviour {
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerScript>();
         MainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
 
+        // Set intro textes
+        IntroTextes = new string[] { GS.SetText("Level ", "Poziom ") + RS.Level, GS.SetText("Deliver the presents", "Dostarcz prezenty")};
+        switch(GS.Level){
+            case 2: IntroTextes[1] = GS.SetText("Watch out for the enemy airplanes!", "Uważaj na wrogie samoloty!"); break;
+            case 5: IntroTextes[1] = GS.SetText("Watch out for the AA Guns, and the new Messerschmitt K4 planes!", "Uważaj na Bronie Przeciwlotnicze, i na nowe Messerschmitt K4"); break;
+            case 10: IntroTextes[1] = GS.SetText("Watch out for the Balloons, and the new Messerschmitt 110 planes!", "Uważaj na Balony, i na nowe Messerschmitt 110!"); break;
+            case 20: IntroTextes[1] = GS.SetText("Watch out for the new Messerschmitt Me 262! These are Jets!", "Uważaj na nowego Messerschmitt Me 262! To są odrzutowce!"); break;
+            default: IntroTextes[1] = GS.SetText("Deliver the presents!", "Dostarcz prezenty!"); break;
+        }
+
     }
 	
-	// Update is called once per frame
-	void Update () {
+	void Update(){
 
-		Music ();
+        Music();
+        FlashImage.color = Color32.Lerp (FlashImage.color, new Color32((byte)FlashImage.color.r, (byte)FlashImage.color.g, (byte)FlashImage.color.b, 0), DisappearSpeed * (Time.unscaledDeltaTime * 100f));
+        if(player != null && player.Intro <= 0f){
+            Alive(true);
+            Intro();
+            Time.timeScale = 1f;
+        } else if(player != null && player.Intro > 0f){
+            Alive();
+            Intro(true);
+            Time.timeScale = 1f;
+        } else {
+            Alive();
+            Intro();
+            Time.timeScale = 1f;
+        }
 
-		// Whiles
-		if (GameObject.FindGameObjectWithTag ("Player") != null) {
-			PlayerHud.SetActive (true);
-			Time.timeScale = 1f;
-		} else {
-			PlayerHud.SetActive (false);
-		}
-		// Whiles
+    }
+
+    void Intro(bool view = false){
+
+        if(view){
+            if(IntroTime > 0f){
+                IntroTime -= Time.deltaTime;
+            } else {
+                for(int it = 0; it <= 1; it++) if (IntroTextes[it].Length > 0) {
+                    IntroTime = 0.02f;
+                    IntroWindow.GetChild(it).GetComponent<Text>().text += IntroTextes[it].Substring(0, 1);
+                    IntroTextes[it] = IntroTextes[it].Remove(0, 1);
+                    if(IntroTextes[it].Length <= 0f) IntroTime = 0.5f;
+                    break;
+                } else if (player.Intro < 0.5f){
+                    IntroWindow.GetChild(it).GetComponent<Text>().color = new Color(1f, 1f, 1f, player.Intro*2f);
+                }
+            }
+        } else if (IntroWindow.GetChild(0).GetComponent<Text>().color.a > 0f) {
+            IntroWindow.GetChild(0).GetComponent<Text>().color = IntroWindow.GetChild(1).GetComponent<Text>().color = new Color(1f, 1f, 1f, Mathf.MoveTowards(IntroWindow.GetChild(0).GetComponent<Text>().color.a, 0f, Time.deltaTime*2f) );
+        }
+
+    }
+
+	void Alive (bool view = false) {
 
 		// While Playing
-		if(player && PlayerHud.activeSelf == true){
+		if(view && player){
+
+            if(!PlayerHud.activeInHierarchy) PlayerHud.SetActive (true);
 
             if (Input.GetKey(KeyCode.LeftShift) && Input.GetButtonDown("Map")) {
                 if (RadarDistance == 100f) {
@@ -90,30 +136,6 @@ public class CanvasScript : MonoBehaviour {
                     RadarDistance = 5000f;
                 } else if (RadarDistance == 5000f) {
                     RadarDistance = 100f;
-                }
-            }
-
-            if (StartingTextDisplay > 0f){
-                StartingTextDisplay -= 0.01f * (Time.deltaTime * 100f);
-                switch(GS.Level){
-                    case 1:
-                        SetInfoText("Deliver the presents!", "Dostarcz prezenty!", new Color32(255, 255, 255, 255), 1f);
-                        break;
-                    case 2:
-                        SetInfoText("Watch out for the enemy airplanes!", "Uważaj na wrogie samoloty!", new Color32(255, 255, 255, 255), 1f);
-                        break;
-                    case 5:
-                        SetInfoText("Watch out for the AA Guns, and the new Messerschmitt K4 planes!", "Uważaj na Bronie Przeciwlotnicze, i na nowe Messerschmitt K4", new Color32(255, 255, 255, 255), 1f);
-                        break;
-                    case 10:
-                        SetInfoText("Watch out for the Balloons, and the new Messerschmitt 110 planes!", "Uważaj na Balony, i na nowe Messerschmitt 110!", new Color32(255, 255, 255, 255), 1f);
-                        break;
-                    case 20:
-                        SetInfoText("Watch out for the new Messerschmitt Me 262! These are Jets!", "Uważaj na nowego Messerschmitt Me 262! To są odrzutowce!", new Color32(255, 255, 255, 255), 1f);
-                        break;
-                    default:
-                        SetInfoText("Mission begins, good luck!", "Misja się zaczęła, powodzenia!", new Color32(255, 255, 255, 255), 1f);
-                        break;
                 }
             }
 
@@ -131,17 +153,15 @@ public class CanvasScript : MonoBehaviour {
                 RadarMap("Radar");
             }
 
-			if(player.GunCooldown <= 0f && (player.Ammo > 0))
-            {
+			if(player.GunCooldown <= 0f && (player.Heat >= 0)) {
 				GunCooldown.fillAmount = 1f;
-				GunCooldown.color = new Color32 (255, 255, 255, 255);
+				GunCooldown.color = Color.Lerp( new Color (1f, 1f, 1f, 1f) , new Color(1f, 0f, 0f, 1f) , (player.Heat-(player.MaxHeat*0.75f)) / (player.MaxHeat*0.75f) );
 			} else {
 				GunCooldown.fillAmount = 1f - (player.GunCooldown / player.MaxGunCooldown);
-				GunCooldown.color = new Color32 (155, 155, 155, 255);
+				GunCooldown.color = Color.Lerp( new Color (0.5f, 0.5f, 0.5f, 1f) , new Color(0.5f, 0f, 0f, 1f) , (player.Heat-(player.MaxHeat*0.75f)) / (player.MaxHeat*0.75f) );
 			}
 
-			if(player.PresentCooldown <= 0f)
-            {
+			if(player.PresentCooldown <= 0f) {
 				PresentCooldown.fillAmount = 1f;
 				PresentCooldown.color = new Color32 (255, 255, 255, 255);
 			} else {
@@ -149,7 +169,7 @@ public class CanvasScript : MonoBehaviour {
 				PresentCooldown.color = new Color32 (155, 155, 155, 255);
 			}
 
-			if(player.SpecialCooldown <= 0f && (player.Ammo >= player.SpecialRequiredAmmo)){
+			if(player.SpecialCooldown <= 0f){
 				SpecialCooldown.fillAmount = 1f;
 				SpecialCooldown.color = new Color32 (255, 255, 255, 255);
 			} else {
@@ -157,7 +177,14 @@ public class CanvasScript : MonoBehaviour {
 				SpecialCooldown.color = new Color32 (155, 155, 155, 255);
 			}
 
-			AmmoText.text = player.Ammo.ToString();
+			AmmoText.text = GS.SetText("Heat: ", "Przegrzanie: ");
+            AmmoText.color = Color.Lerp( new Color (1f, 1f, 1f, 1f) , new Color(1f, 0f, 0f, 1f) , (player.Heat-(player.MaxHeat*0.75f)) / (player.MaxHeat*0.75f) );
+            for(float gh = 0f; gh < 1f; gh+=0.1f){
+                if(player.Heat >= 0f && gh > player.Heat / player.MaxHeat) AmmoText.text += ".";
+                else if(player.Heat <= -10f && gh > (player.Heat+10f)*-1f / player.MaxHeat) AmmoText.text += ".";
+                else AmmoText.text += "I";
+            }
+
 			if((player.Stalling > 0f) || (player.Speed >= (player.MaxSpeed * 1.75f))){
 				Speed.color = new Color32 (255, 0, 0, 255);
 			} else {
@@ -172,7 +199,6 @@ public class CanvasScript : MonoBehaviour {
 			}
 
 			CurrentLevelText.text = GS.SetText ("Level: " + GS.Level, "Poziom: " + GS.Level);
-			FlashImage.color = Color32.Lerp (FlashImage.color, new Color32((byte)FlashImage.color.r, (byte)FlashImage.color.g, (byte)FlashImage.color.b, 0), DisappearSpeed * (Time.unscaledDeltaTime * 100f));
 
             if (GS.Parachutes > 0) {
                 PIcon.color = new Color32(255, 255, 255, 125);
@@ -192,15 +218,6 @@ public class CanvasScript : MonoBehaviour {
 
                 SteeringCircle.rectTransform.anchoredPosition = Vector2.zero;
                 SteeringCircle.GetComponent<Image>().color = new Color(1f,1f,1f, Vector3.Angle(player.transform.forward, player.PointThere.forward) / 10f);
-			
-                if(player.WhichCamera == "Turret"){
-                    Crosshair.transform.position = MainCamera.WorldToScreenPoint(MainCamera.transform.position + MainCamera.transform.forward);
-                    Crosshair.transform.localScale = Vector3.one;
-                } else {
-                    Crosshair.transform.position = MainCamera.WorldToScreenPoint(player.transform.position + player.transform.forward * 900f);
-                    if(player.WhichCamera == "Aim") Crosshair.transform.localScale = Vector3.one;
-                    else Crosshair.transform.localScale = Vector3.one/2f;
-                }
 
             } else {
 
@@ -210,18 +227,23 @@ public class CanvasScript : MonoBehaviour {
                 SteeringCircle.rectTransform.anchorMin = new Vector2 (Input.mousePosition.x / Screen.width, Input.mousePosition.y / Screen.height);
 	    		SteeringCircle.rectTransform.anchorMax = new Vector2 (Input.mousePosition.x / Screen.width, Input.mousePosition.y / Screen.height);
     			SteeringCircle.rectTransform.anchoredPosition = new Vector2 (0f, 0f);
-			
-                if(player.WhichCamera == "Turret" || player.WhichCamera == "Aim"){
-                    Crosshair.transform.position = MainCamera.WorldToScreenPoint(MainCamera.transform.position + MainCamera.transform.forward);
-                    Crosshair.transform.localScale = Vector3.one;
-                } else {
-                    Crosshair.transform.position = MainCamera.WorldToScreenPoint(player.transform.position + player.transform.forward * 100f);
-                    Crosshair.transform.localScale = Vector3.one/2f;
-                }
 
             }
 
-		}
+            if(player.WhichCamera == "Turret"){
+                Crosshair.transform.position = MainCamera.WorldToScreenPoint(MainCamera.transform.position + MainCamera.transform.forward);
+                Crosshair.transform.localScale = Vector3.one;
+            } else {
+                Crosshair.transform.position = MainCamera.WorldToScreenPoint(player.transform.position + player.transform.forward * Mathf.Clamp(player.GunDistane, 0f, 900f));
+                if(player.WhichCamera == "Aim") Crosshair.transform.localScale = Vector3.one;
+                else Crosshair.transform.localScale = Vector3.one/2f;
+            }
+
+		} else {
+
+            PlayerHud.SetActive (false);
+
+        }
 		// While Playing
 		
 	}
@@ -327,7 +349,7 @@ public class CanvasScript : MonoBehaviour {
                     TheMarkings.Add(player.gameObject);
                 }
                 foreach (GameObject Marker in TheMarkings) {
-                    if (Marker.transform.position.x > -2500f && Marker.transform.position.x < 2500f && Marker.transform.position.z > -2500f && Marker.transform.position.z < 2500f) {
+                    if (Marker.transform.position.x > -RS.MapSize/2f && Marker.transform.position.x < RS.MapSize/2f && Marker.transform.position.z > -RS.MapSize/2f && Marker.transform.position.z < RS.MapSize/2f) {
                         GameObject PickMarker = null;
                         Color32 PickColor = new Color32(0, 0, 0, 0);
                         float MarkerRotation = 0f;
@@ -361,8 +383,8 @@ public class CanvasScript : MonoBehaviour {
                         Mark.transform.SetParent(Map.transform);
                         Mark.transform.position = Map.transform.position;
                         Mark.transform.localScale *= this.transform.localScale.y;
-                        Mark.transform.GetChild(0).GetComponent<RectTransform>().anchorMin = new Vector2(0.5f + (DesiredPosition.x / 1250f), 0.5f + (DesiredPosition.z / 1250f));
-                        Mark.transform.GetChild(0).GetComponent<RectTransform>().anchorMax = new Vector2(0.5f + (DesiredPosition.x / 1250f), 0.5f + (DesiredPosition.z / 1250f));
+                        Mark.transform.GetChild(0).GetComponent<RectTransform>().anchorMin = new Vector2(0.5f + (DesiredPosition.x / (RS.MapSize/4f)), 0.5f + (DesiredPosition.z / (RS.MapSize/4f)));
+                        Mark.transform.GetChild(0).GetComponent<RectTransform>().anchorMax = new Vector2(0.5f + (DesiredPosition.x / (RS.MapSize/4f)), 0.5f + (DesiredPosition.z / (RS.MapSize/4f)));
                         Mark.transform.GetChild(0).GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 0f);
                         Mark.transform.GetChild(0).localEulerAngles = new Vector3(0f, 0f, MarkerRotation);
                         Mark.transform.GetChild(0).GetComponent<Image>().color = PickColor;
@@ -374,22 +396,17 @@ public class CanvasScript : MonoBehaviour {
 
     }
 
-    void FixedUpdate()
-    {
+    void FixedUpdate(){
 
-        if (PlayerHud.activeSelf == true)
-        {
-            // Info
-            if (Info.color.a > 0 && (Info.transform.localScale.x > 0.49f && Info.transform.localScale.x < 0.51f))
-            {
-                Info.color = Color32.Lerp(Info.color, new Color32((byte)Info.color.r, (byte)Info.color.g, (byte)Info.color.b, 0), 0.01f);
-            }
-            if (Info.transform.localScale.x != 0.5f)
-            {
-                Info.transform.localScale = Vector3.Lerp(Info.transform.localScale, new Vector3(0.5f, 0.5f, 0.5f), 0.01f);
-            }
-            // Info
+        // Info
+        if (Info.color.a > 0 && (Info.transform.localScale.x > 0.49f && Info.transform.localScale.x < 0.51f)) {
+            Info.color = Color32.Lerp(Info.color, new Color32((byte)Info.color.r, (byte)Info.color.g, (byte)Info.color.b, 0), 0.01f);
         }
+        if (Info.transform.localScale.x != 0.5f){
+            Info.transform.localScale = Vector3.Lerp(Info.transform.localScale, new Vector3(0.5f, 0.5f, 0.5f), 0.01f);
+        }
+        // Info
+
     }
 
     void Music(){

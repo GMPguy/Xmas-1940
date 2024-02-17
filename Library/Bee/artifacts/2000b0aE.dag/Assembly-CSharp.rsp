@@ -34,7 +34,6 @@
 -define:USE_PROPERTY_DATABASE
 -define:USE_QUERY_BUILDER
 -define:USE_SEARCH_EXTENSION_API
--define:UNITY_ANALYTICS
 -define:SCENE_TEMPLATE_MODULE
 -define:ENABLE_AUDIO
 -define:ENABLE_CLOTH
@@ -312,10 +311,10 @@
 -r:"C:/Program Files/Unity/Hub/Editor/2022.1.23f1/Editor/Data/PlaybackEngines/AndroidPlayer/Unity.Android.Gradle.dll"
 -r:"C:/Program Files/Unity/Hub/Editor/2022.1.23f1/Editor/Data/PlaybackEngines/AndroidPlayer/Unity.Android.Types.dll"
 -r:"C:/Program Files/Unity/Hub/Editor/2022.1.23f1/Editor/Data/PlaybackEngines/WebGLSupport/Managed/UnityEngine.WebGLModule.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.analytics@3.7.1/AnalyticsStandardEvents/Unity.Analytics.StandardEvents.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.analytics@3.7.1/Unity.Analytics.Editor.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.analytics@3.7.1/Unity.Analytics.Tracker.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.nuget.newtonsoft-json@3.0.2/Runtime/Newtonsoft.Json.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.analytics@3.7.1/AnalyticsStandardEvents/Unity.Analytics.StandardEvents.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.analytics@3.7.1/Unity.Analytics.Editor.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.analytics@3.7.1/Unity.Analytics.Tracker.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.nuget.newtonsoft-json@3.0.2/Runtime/Newtonsoft.Json.dll"
 -r:"Library/Bee/artifacts/2000b0aE.dag/Analytics.ref.dll"
 -r:"Library/Bee/artifacts/2000b0aE.dag/Purchasing.Common.ref.dll"
 -r:"Library/Bee/artifacts/2000b0aE.dag/Unity.2D.Sprite.Editor.ref.dll"
@@ -407,6 +406,7 @@
 "Assets/Scripts/PlayerScript.cs"
 "Assets/Scripts/ProjectileScript.cs"
 "Assets/Scripts/RoundScript.cs"
+"Assets/Scripts/SoundControll.cs"
 "Assets/Scripts/SpecialScript.cs"
 -langversion:9.0
 

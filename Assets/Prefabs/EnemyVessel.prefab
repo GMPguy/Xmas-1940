@@ -318,8 +318,9 @@ GameObject:
   - component: {fileID: 33582310664067056}
   - component: {fileID: 23430417038726914}
   - component: {fileID: 82447694759488744}
+  - component: {fileID: 9187833447638250266}
   m_Layer: 0
-  m_Name: Propeller (1)
+  m_Name: Propeller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -486,6 +487,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+--- !u!114 &9187833447638250266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099454978741166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c3f3e3d61c51344a6af3e2e72e46cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AudioType: 0
 --- !u!1 &1133342498807064
 GameObject:
   m_ObjectHideFlags: 0
@@ -10287,7 +10301,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4566161498378560}
-  - component: {fileID: 114946294450021026}
   - component: {fileID: 212564538420709932}
   m_Layer: 0
   m_Name: MarkerNearAirplane
@@ -10312,21 +10325,6 @@ Transform:
   m_Father: {fileID: 4956962457971708}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114946294450021026
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1311321391116556}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7f2f1926e0acd84cbe5869de65c5c16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Camera: {fileID: 0}
-  KeepScale: 1
-  ScaleMultiplier: 0.2
 --- !u!212 &212564538420709932
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -10446,6 +10444,7 @@ MonoBehaviour:
   PlaneDead: {fileID: 1079280524910036, guid: e58c823f0337fbc4b9a43ef772692609, type: 3}
   BalloonDeadEffects: {fileID: 1537276058909606}
   Special: {fileID: 1682660888132620, guid: bcae05ff25096b949ad73ead6a98dc93, type: 3}
+  Power: 1
   Health: 100
   Speed: 0
   MaxSpeed: 0
@@ -10481,7 +10480,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4666647221624750}
-  - component: {fileID: 114967022681068034}
   - component: {fileID: 212463338092183130}
   m_Layer: 0
   m_Name: MarkerNearGround
@@ -10506,21 +10504,6 @@ Transform:
   m_Father: {fileID: 4956962457971708}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114967022681068034
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1343988070151498}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7f2f1926e0acd84cbe5869de65c5c16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Camera: {fileID: 0}
-  KeepScale: 1
-  ScaleMultiplier: 0.2
 --- !u!212 &212463338092183130
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -10582,7 +10565,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4628965701172130}
-  - component: {fileID: 114018368887987280}
   - component: {fileID: 212967173006091984}
   m_Layer: 0
   m_Name: MarkerNear
@@ -10607,21 +10589,6 @@ Transform:
   m_Father: {fileID: 4956962457971708}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114018368887987280
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1363104661065442}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7f2f1926e0acd84cbe5869de65c5c16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Camera: {fileID: 0}
-  KeepScale: 1
-  ScaleMultiplier: 0.2
 --- !u!212 &212967173006091984
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -10686,8 +10653,9 @@ GameObject:
   - component: {fileID: 33671946563473946}
   - component: {fileID: 23987651860784760}
   - component: {fileID: 82498494420793350}
+  - component: {fileID: 5500291996317596322}
   m_Layer: 0
-  m_Name: Propeller (2)
+  m_Name: Propeller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10854,6 +10822,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+--- !u!114 &5500291996317596322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425707627857302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c3f3e3d61c51344a6af3e2e72e46cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AudioType: 0
 --- !u!1 &1462174573921072
 GameObject:
   m_ObjectHideFlags: 0
@@ -20743,7 +20724,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1574497057769476}
   m_LocalRotation: {x: 0.00012344122, y: -0.00012332201, z: -0.70710677, w: 0.70710677}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 2.53, y: 0, z: 0}
   m_LocalScale: {x: 1.1811023, y: 1.1811023, z: 1.1811023}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20762,8 +20743,9 @@ GameObject:
   - component: {fileID: 198414432007219578}
   - component: {fileID: 199716751340377276}
   - component: {fileID: 82144776574167894}
+  - component: {fileID: 344337482752846766}
   m_Layer: 0
-  m_Name: Jet
+  m_Name: Jet Engine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25419,7 +25401,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 69f8b4e2bf1340d428dc609e514f2c68, type: 2}
-  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -25566,6 +25547,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+--- !u!114 &344337482752846766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1589175501940982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c3f3e3d61c51344a6af3e2e72e46cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AudioType: 0
 --- !u!1 &1616699540318050
 GameObject:
   m_ObjectHideFlags: 0
@@ -25687,7 +25681,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1763370387174120}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.225, y: -0.35, z: 1.5}
+  m_LocalPosition: {x: 1.4, y: -0.35, z: 2.403}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -25749,7 +25743,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1793152203090900}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.225, y: 0.35, z: 1.5}
+  m_LocalPosition: {x: 1.4, y: 0.35, z: 2.403}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -25767,9 +25761,8 @@ GameObject:
   - component: {fileID: 4985672190443984}
   - component: {fileID: 33796406808904628}
   - component: {fileID: 23957022801874776}
-  - component: {fileID: 82612346629573820}
   m_Layer: 0
-  m_Name: Propeller (3)
+  m_Name: Propeller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25840,102 +25833,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!82 &82612346629573820
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1817334973041482}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: bc0834275ce8253439acc08ad070fc83, type: 3}
-  m_PlayOnAwake: 1
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 1
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 256
-  DopplerLevel: 1
-  MinDistance: 25
-  MaxDistance: 1000
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
 --- !u!1 &1932489803186384
 GameObject:
   m_ObjectHideFlags: 0
@@ -25945,7 +25842,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4434544777490478}
-  - component: {fileID: 114264812460606760}
   - component: {fileID: 212405227820017896}
   m_Layer: 0
   m_Name: MarkerNearBalloon
@@ -25970,21 +25866,6 @@ Transform:
   m_Father: {fileID: 4956962457971708}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114264812460606760
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1932489803186384}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7f2f1926e0acd84cbe5869de65c5c16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Camera: {fileID: 0}
-  KeepScale: 1
-  ScaleMultiplier: 0.2
 --- !u!212 &212405227820017896
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -26048,9 +25929,8 @@ GameObject:
   - component: {fileID: 4908896455690128}
   - component: {fileID: 198206004710323020}
   - component: {fileID: 199095108159444510}
-  - component: {fileID: 82279529385357310}
   m_Layer: 0
-  m_Name: Jet (1)
+  m_Name: Jet Engine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30706,7 +30586,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 69f8b4e2bf1340d428dc609e514f2c68, type: 2}
-  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -30757,102 +30636,6 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
---- !u!82 &82279529385357310
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1948691884500532}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: a18605245b5984f4095c195af10ecdc0, type: 3}
-  m_PlayOnAwake: 1
-  m_Volume: 0.75
-  m_Pitch: 1
-  Loop: 1
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 256
-  DopplerLevel: 0
-  MinDistance: 10
-  MaxDistance: 50
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
 --- !u!1 &1986730646141070
 GameObject:
   m_ObjectHideFlags: 0
@@ -30865,6 +30648,7 @@ GameObject:
   - component: {fileID: 33700024303473676}
   - component: {fileID: 23457671603886670}
   - component: {fileID: 82309513333698346}
+  - component: {fileID: 7254424275837352464}
   m_Layer: 0
   m_Name: Propeller
   m_TagString: Untagged
@@ -31033,3 +30817,16 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+--- !u!114 &7254424275837352464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986730646141070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03c3f3e3d61c51344a6af3e2e72e46cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AudioType: 0

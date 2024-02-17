@@ -34,7 +34,6 @@
 -define:USE_PROPERTY_DATABASE
 -define:USE_QUERY_BUILDER
 -define:USE_SEARCH_EXTENSION_API
--define:UNITY_ANALYTICS
 -define:SCENE_TEMPLATE_MODULE
 -define:ENABLE_AUDIO
 -define:ENABLE_CLOTH
@@ -321,14 +320,14 @@
 -r:"C:/Program Files/Unity/Hub/Editor/2022.1.23f1/Editor/Data/PlaybackEngines/WebGLSupport/Managed/UnityEngine.WebGLModule.dll"
 -r:"C:/Program Files/Unity/Hub/Editor/2022.1.23f1/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll"
 -r:"C:/Program Files/Unity/Hub/Editor/2022.1.23f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.analytics@3.7.1/AnalyticsStandardEvents/Unity.Analytics.StandardEvents.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.analytics@3.7.1/Unity.Analytics.Editor.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.analytics@3.7.1/Unity.Analytics.Tracker.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.collab-proxy@1.17.6/Lib/Editor/PlasticSCM/log4netPlastic.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.collab-proxy@1.17.6/Lib/Editor/PlasticSCM/Unity.Plastic.Antlr3.Runtime.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.collab-proxy@1.17.6/Lib/Editor/PlasticSCM/Unity.Plastic.Newtonsoft.Json.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.collab-proxy@1.17.6/Lib/Editor/PlasticSCM/unityplastic.dll"
--r:"D:/Moje Gry/Xmas 1940/Xmas 1940/Library/PackageCache/com.unity.nuget.newtonsoft-json@3.0.2/Runtime/Newtonsoft.Json.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.analytics@3.7.1/AnalyticsStandardEvents/Unity.Analytics.StandardEvents.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.analytics@3.7.1/Unity.Analytics.Editor.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.analytics@3.7.1/Unity.Analytics.Tracker.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.collab-proxy@1.17.6/Lib/Editor/PlasticSCM/log4netPlastic.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.collab-proxy@1.17.6/Lib/Editor/PlasticSCM/Unity.Plastic.Antlr3.Runtime.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.collab-proxy@1.17.6/Lib/Editor/PlasticSCM/Unity.Plastic.Newtonsoft.Json.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.collab-proxy@1.17.6/Lib/Editor/PlasticSCM/unityplastic.dll"
+-r:"D:/Moje Gry/Xmas-1940/Library/PackageCache/com.unity.nuget.newtonsoft-json@3.0.2/Runtime/Newtonsoft.Json.dll"
 "Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventData/AxisEventData.cs"
 "Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventData/BaseEventData.cs"
 "Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventData/PointerEventData.cs"

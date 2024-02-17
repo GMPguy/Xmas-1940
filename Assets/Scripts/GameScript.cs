@@ -12,12 +12,15 @@ public class GameScript : MonoBehaviour {
 	// References
 
 	// Options
+	public int currentResolution = -1;
+	public Vector2[] LoadedResolutions;
 	public string Language = "English";
-	public int GraphicSetting = 0;
 	public int HighScore = 0;
-	public float AudioVolume = 1f;
-	public float MusicVolume = 1f;
+	public float[] Volumes = new float[] { 1f, 1f, 1f, -1}; // master, music, sounds, prev sounds
+	public int ControlScheme = 0; // Mouse and Keyboard, Pointing
 	public bool InvertedMouse = false;
+    readonly Color[] PrevLight = new Color[2];
+	int SwitchDesperate = 0;
 	// Options
 
 	// Game
@@ -55,6 +58,7 @@ public class GameScript : MonoBehaviour {
 
 	// Main Variables
 	public string Version = "1.0";
+	public string Build = "Screen";
 	// Main Variables
 
 	// Use this for initialization
@@ -66,17 +70,35 @@ public class GameScript : MonoBehaviour {
 				DontDestroyOnLoad (this.gameObject);
 				// Load stuff
 				if(PlayerPrefs.GetInt("HasSaved") == 1){
+					currentResolution = PlayerPrefs.GetInt("Resolution");
 					Language = PlayerPrefs.GetString ("Language");
-					AudioVolume = PlayerPrefs.GetFloat ("AudioVolume");
-					MusicVolume = PlayerPrefs.GetFloat ("MusicVolume");
+					Volumes[0] = PlayerPrefs.GetFloat ("MasterVolume");
+					Volumes[1] = PlayerPrefs.GetFloat ("AudioVolume");
+					Volumes[2] = PlayerPrefs.GetFloat ("MusicVolume");
 					HighScore = PlayerPrefs.GetInt ("HighScore");
-					if (PlayerPrefs.GetString ("Inverted") == "True") {
-						InvertedMouse = true;
-					} else {
-						InvertedMouse = false;
-					}
+					ControlScheme = PlayerPrefs.GetInt("Controls");
+
+					if (PlayerPrefs.GetString ("Inverted") == "True") InvertedMouse = true;
+					else InvertedMouse = false;
+
+					if (PlayerPrefs.GetString ("Fullscreen") == "True") Screen.fullScreen = true;
+					else Screen.fullScreen = false;
+					
 				}
 				// Load stuff
+
+				List<Vector2> loadResolutions = new();
+				int defaulte = 0;
+				int prefRR = -1;
+				foreach(Resolution res in Screen.resolutions)
+				if(res.refreshRate == prefRR || prefRR == -1) {
+					loadResolutions.Add(new Vector2(res.width, res.height));
+					defaulte++;
+					if(res.width == 800 && currentResolution == -1) currentResolution = defaulte;
+					if(prefRR == -1) prefRR = res.refreshRate;
+				}
+				LoadedResolutions = loadResolutions.ToArray();
+
 			} else {
 				Destroy (this.gameObject);
 			}
@@ -112,13 +134,25 @@ public class GameScript : MonoBehaviour {
 				GameObject.Find ("MainCamera").GetComponent<Camera> ().allowMSAA = true;
 			}
 
-			if (QualitySettings.GetQualityLevel () == 0) {
+			if (QualitySettings.GetQualityLevel () == 0 && SwitchDesperate != 0) {
+				SwitchDesperate = 0;
 				GameObject.Find ("MainCamera").GetComponent<Camera> ().clearFlags = CameraClearFlags.Color;
 				if(GameObject.Find("MainLight")){
 					Light S = GameObject.Find("MainLight").GetComponent<Light>();
+					PrevLight[0] = GameObject.Find ("MainCamera").GetComponent<Camera> ().backgroundColor;
 					GameObject.Find ("MainCamera").GetComponent<Camera> ().backgroundColor = S.color;
+					PrevLight[1] = RenderSettings.ambientLight;
 					RenderSettings.ambientLight = S.color;
 					S.intensity = 0f;
+				}
+			} else if (QualitySettings.GetQualityLevel () != 0 && SwitchDesperate != 1) {
+				SwitchDesperate = 1;
+				GameObject.Find ("MainCamera").GetComponent<Camera> ().clearFlags = CameraClearFlags.Skybox;
+				if(GameObject.Find("MainLight")){
+					Light S = GameObject.Find("MainLight").GetComponent<Light>();
+					GameObject.Find ("MainCamera").GetComponent<Camera> ().backgroundColor = PrevLight[0];
+					RenderSettings.ambientLight = PrevLight[1];
+					S.intensity = 1f;
 				}
 			}
 
@@ -132,15 +166,9 @@ public class GameScript : MonoBehaviour {
 		// Set Graphics
 
 		// Set Audios
-		foreach(AudioSource A in FindSceneObjectsOfType(typeof(AudioSource)) as AudioSource[]){
-
-			if (A.name == "Prologue" || A.name == "Main" || A.name == "GameOver" || A.name == "Music" || A.name == "Campaign") {
-				A.volume = MusicVolume;
-			} else {
-				A.volume = AudioVolume;
-			}
-
-
+		if(Volumes[3] != Volumes[0] + Volumes[1] + Volumes[2]) {
+			Volumes[3] = Volumes[0] + Volumes[1] + Volumes[2];
+			foreach(SoundControll A in FindObjectsOfType<SoundControll>()) A.Set();
 		}
 		// Set Audios
 		
@@ -156,6 +184,7 @@ public class GameScript : MonoBehaviour {
 
 	public void LoadLevel(string LevelName){
 		SceneManager.LoadScene (LevelName);
+		SwitchDesperate = 1;
 	}
 
 	public void SetGameOptions(string Which, string File){
@@ -263,10 +292,14 @@ public class GameScript : MonoBehaviour {
 
 		if(EreasePrefs == false){
 			PlayerPrefs.SetInt ("HasSaved", 1);
+			PlayerPrefs.SetInt ("Resolution", currentResolution);
 			PlayerPrefs.SetString ("Language", Language);
+			PlayerPrefs.SetInt ("Controls", ControlScheme);
 			PlayerPrefs.SetString ("Inverted", InvertedMouse.ToString());
-			PlayerPrefs.SetFloat ("AudioVolume", AudioVolume);
-			PlayerPrefs.SetFloat ("MusicVolume", MusicVolume);
+			PlayerPrefs.SetString ("Fullscreen", Screen.fullScreen.ToString());
+			PlayerPrefs.SetFloat ("MasterVolume", Volumes[0]);
+			PlayerPrefs.SetFloat ("AudioVolume", Volumes[1]);
+			PlayerPrefs.SetFloat ("MusicVolume", Volumes[2]);
 			PlayerPrefs.SetInt ("HighScore", HighScore);
 		}
 
